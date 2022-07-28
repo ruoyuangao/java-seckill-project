@@ -1,15 +1,19 @@
 package com.jiuzhang.seckill.web;
 
 import com.jiuzhang.seckill.db.dao.SeckillActivityDao;
+import com.jiuzhang.seckill.db.dao.SeckillCommodityDao;
 import com.jiuzhang.seckill.db.po.SeckillActivity;
+import com.jiuzhang.seckill.db.po.SeckillCommodity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -17,6 +21,9 @@ public class SeckillActivityController {
 
     @Autowired
     private SeckillActivityDao seckillActivityDao;
+
+    @Autowired
+    private SeckillCommodityDao seckillCommodityDao;
 
     @RequestMapping("/addSeckillActivity")
     public String addSeckillActivity() {
@@ -52,5 +59,33 @@ public class SeckillActivityController {
         seckillActivityDao.inertSeckillActivity(seckillActivity);
         resultMap.put("seckillActivity", seckillActivity);
         return "add_success";
+    }
+
+    // show all the Seckill activities
+    @RequestMapping("/seckills")
+    public String activityList(
+            Map<String, Object> resultMap
+    ) {
+        List<SeckillActivity> seckillActivities = seckillActivityDao.querySeckillActivitysByStatus(1);
+        resultMap.put("seckillActivities", seckillActivities);
+        return "seckill_activity";
+    }
+
+    // the detail information page for each activity
+    @RequestMapping("/item/{seckillActivityId}")
+    public String itemPage(
+            @PathVariable("seckillActivityId") long seckillActivityId,
+            Map<String, Object> resultMap
+    ) {
+        SeckillActivity seckillActivity = seckillActivityDao.querySeckillActivityById(seckillActivityId);
+        SeckillCommodity seckillCommodity = seckillCommodityDao.querySeckillCommodityById(seckillActivity.getCommodityId());
+        resultMap.put("seckillActivity", seckillActivity);
+        resultMap.put("seckillCommodity", seckillCommodity);
+        resultMap.put("seckillPrice", seckillActivity.getSeckillPrice());
+        resultMap.put("oldPrice", seckillActivity.getOldPrice());
+        resultMap.put("commodityId", seckillActivity.getCommodityId());
+        resultMap.put("commodityName", seckillCommodity.getCommodityName());
+        resultMap.put("commodityDesc", seckillCommodity.getCommodityDesc());
+        return "seckill_item";
     }
 }
