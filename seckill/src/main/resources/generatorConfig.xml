@@ -44,8 +44,8 @@ Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd"
         </javaClientGenerator>
 
         <table schema=""
-               tableName="seckill_activity"
-               domainObjectName="SeckillActivity"
+               tableName="seckill_order"
+               domainObjectName="Order"
                enableCountByExample="false"
                enableDeleteByExample="false"
                enableSelectByExample="false"
@@ -53,8 +53,8 @@ Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd"
                selectByExampleQueryId="false">
         </table>
         <table schema=""
-               tableName="seckill_commodity"
-               domainObjectName="SeckillCommodity"
+               tableName="seckill_user"
+               domainObjectName="User"
                enableCountByExample="false"
                enableDeleteByExample="false"
                enableSelectByExample="false"
