@@ -13,7 +13,6 @@ public class OrderDaoImpl implements OrderDao{
     @Override
     public void insertOrder(Order order) {
         mapper.insert(order);
-
     }
 
     @Override
