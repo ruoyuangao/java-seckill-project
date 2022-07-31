@@ -22,7 +22,7 @@
     where id = #{id,jdbcType=BIGINT}
   </select>
 
-  <select id="selectByOrderNo" resultType="com.jiuzhang.seckill.do.po.Order" resultMap="BaseResultMap">
+  <select id="selectByOrderNo" resultType="com.jiuzhang.seckill.db.po.Order" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />>
     from seckill_order
