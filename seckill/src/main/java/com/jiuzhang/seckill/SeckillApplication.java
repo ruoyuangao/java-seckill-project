@@ -6,9 +6,9 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.ComponentScan;
 
 
+@ComponentScan(basePackages = {"com.jiuzhang"})
 @SpringBootApplication
 @MapperScan("com.jiuzhang.seckill.db.mappers")
-@ComponentScan(basePackages = {"com.jiuzhang"})
 public class SeckillApplication {
     public static void main(String[] args) { SpringApplication.run(SeckillApplication.class, args);
     }
