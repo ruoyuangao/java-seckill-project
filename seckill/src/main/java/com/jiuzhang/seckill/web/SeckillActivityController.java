@@ -1,5 +1,6 @@
 package com.jiuzhang.seckill.web;
 
+import com.jiuzhang.seckill.db.dao.OrderDao;
 import com.jiuzhang.seckill.db.dao.SeckillActivityDao;
 import com.jiuzhang.seckill.db.dao.SeckillCommodityDao;
 import com.jiuzhang.seckill.db.po.Order;
@@ -7,7 +8,6 @@ import com.jiuzhang.seckill.db.po.SeckillActivity;
 import com.jiuzhang.seckill.db.po.SeckillCommodity;
 import com.jiuzhang.seckill.services.SeckillActivityService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,10 +25,13 @@ import java.util.Map;
 @Controller
 public class SeckillActivityController {
 
-    @Autowired
+    @Resource
+    private OrderDao orderDao;
+
+    @Resource
     private SeckillActivityDao seckillActivityDao;
 
-    @Autowired
+    @Resource
     private SeckillCommodityDao seckillCommodityDao;
 
     @Resource
@@ -122,5 +125,24 @@ public class SeckillActivityController {
         }
         modelAndView.setViewName("seckill_result");
         return modelAndView;
+    }
+
+    @RequestMapping("/seckill/orderQuery/{orderNo}")
+    public ModelAndView orderQuery(@PathVariable String orderNo) {
+        log.info("Order Search, order Id:" + orderNo);
+        Order order = orderDao.queryOrder(orderNo);
+        ModelAndView modelAndView = new ModelAndView();
+
+        if (order != null) {
+            modelAndView.setViewName("order");
+            modelAndView.addObject("order", order);
+            SeckillActivity seckillActivity = seckillActivityDao.querySeckillActivityById(order.getSeckillActivityId());
+            modelAndView.addObject("seckillActivity", seckillActivity);
+        } else {
+            modelAndView.setViewName("order_wait");
+        }
+
+        return modelAndView;
+
     }
 }
