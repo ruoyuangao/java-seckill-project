@@ -22,12 +22,13 @@
     where id = #{id,jdbcType=BIGINT}
   </select>
 
-  <select id="selectByOrderNo" resultType="com.jiuzhang.seckill.db.po.Order" resultMap="BaseResultMap">
+  <select id="selectByOrderNo" parameterType="java.lang.String" resultMap="BaseResultMap">
     select
-    <include refid="Base_Column_List" />>
+    <include refid="Base_Column_List"/>
     from seckill_order
-    where order_no = #{orderNo, jdbcType=BIGINT}
+    where order_no = #{orderNo,jdbcType=BIGINT}
   </select>
+
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
     delete from seckill_order
     where id = #{id,jdbcType=BIGINT}
