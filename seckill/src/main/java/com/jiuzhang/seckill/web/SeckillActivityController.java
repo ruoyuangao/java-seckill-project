@@ -6,6 +6,7 @@ import com.jiuzhang.seckill.db.dao.SeckillCommodityDao;
 import com.jiuzhang.seckill.db.po.Order;
 import com.jiuzhang.seckill.db.po.SeckillActivity;
 import com.jiuzhang.seckill.db.po.SeckillCommodity;
+import com.jiuzhang.seckill.services.RedisService;
 import com.jiuzhang.seckill.services.SeckillActivityService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -33,6 +34,9 @@ public class SeckillActivityController {
 
     @Resource
     private SeckillCommodityDao seckillCommodityDao;
+
+    @Resource
+    private RedisService redisService;
 
     @Resource
     private SeckillActivityService seckillActivityService;
@@ -101,6 +105,7 @@ public class SeckillActivityController {
         return "seckill_item";
     }
 
+    /** Process the seckill request */
     @RequestMapping("/seckill/buy/{userId}/{seckillActivityId}")
     public ModelAndView seckillCommodity(
             @PathVariable long userId,
@@ -111,11 +116,26 @@ public class SeckillActivityController {
         ModelAndView modelAndView = new ModelAndView();
 
         try {
+            /*
+            Check whether the user is in limit member list
+             */
+            if (redisService.isInLimitMember(seckillActivityId, userId)) {
+                // notify users they are in limit member list and return the result
+                modelAndView.addObject("resultInfo", "Sorry, you are in the limit member list");
+                modelAndView.setViewName("seckill_result");
+                return modelAndView;
+            }
+
+            /*
+            Check whether the activity is valid
+             */
             stockValidateResult = seckillActivityService.seckillStockValidator(seckillActivityId);
             if (stockValidateResult) {
                 Order order = seckillActivityService.createOrder(seckillActivityId, userId);
                 modelAndView.addObject("resultInfo", "Seckill successfully! Order creatin, order Id:" + order.getOrderNo());
                 modelAndView.addObject("orderNo", order.getOrderNo());
+                // add user in limit member list
+                redisService.addLimitMember(seckillActivityId, userId);
             } else {
                 modelAndView.addObject("resultInfo", "Sorry, we do not have enough stock");
             }
@@ -150,4 +170,6 @@ public class SeckillActivityController {
         seckillActivityService.payOrderProcess(orderNo);
         return "redirect:/seckill/orderQuery/" + orderNo;
     }
+
+
 }

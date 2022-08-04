@@ -1,5 +1,6 @@
 package com.jiuzhang.seckill.services;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -7,6 +8,7 @@ import redis.clients.jedis.JedisPool;
 import javax.annotation.Resource;
 import java.util.Collections;
 
+@Slf4j
 @Service
 public class RedisService {
 
@@ -61,6 +63,31 @@ public class RedisService {
     public void revertStock(String key) {
         Jedis jedisClient = jedisPool.getResource();
         jedisClient.incr(key);
+        jedisClient.close();
+    }
+
+    /**
+     * Check whether user is in limit member list
+     * @param seckillActivityId
+     * @param userId
+     * @return
+     */
+    public boolean isInLimitMember(long seckillActivityId, long userId) {
+        Jedis jedisClient = jedisPool.getResource();
+        boolean sismember = jedisClient.sismember("seckillActivity_users:" + seckillActivityId, String.valueOf(userId));
+        log.info("userId:{} activityId:{} is in the limit member list: {}", userId, seckillActivityId, sismember);
+        return sismember;
+    }
+
+    /**
+     * Add limit member list
+     *
+     * @param seckillActivityId
+     * @param userId
+     */
+    public void addLimitMember(long seckillActivityId, long userId) {
+        Jedis jedisClient = jedisPool.getResource();
+        jedisClient.sadd("seckillActivity_users:" + seckillActivityId, String.valueOf(userId));
         jedisClient.close();
     }
 }
