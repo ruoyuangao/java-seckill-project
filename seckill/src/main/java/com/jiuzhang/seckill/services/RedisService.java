@@ -80,7 +80,7 @@ public class RedisService {
     }
 
     /**
-     * Add limit member list
+     * Add user to limit member list
      *
      * @param seckillActivityId
      * @param userId
@@ -88,6 +88,18 @@ public class RedisService {
     public void addLimitMember(long seckillActivityId, long userId) {
         Jedis jedisClient = jedisPool.getResource();
         jedisClient.sadd("seckillActivity_users:" + seckillActivityId, String.valueOf(userId));
+        jedisClient.close();
+    }
+
+    /**
+     * Remove user from limit member list
+     *
+     * @param seckillActivityId
+     * @param userId
+     */
+    public void removeLimitMember(Long seckillActivityId, Long userId) {
+        Jedis jedisClient = jedisPool.getResource();
+        jedisClient.srem("seckillActivity_users:" + seckillActivityId, String.valueOf(userId));
         jedisClient.close();
     }
 }

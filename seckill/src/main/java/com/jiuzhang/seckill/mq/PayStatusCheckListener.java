@@ -47,6 +47,9 @@ public class PayStatusCheckListener implements RocketMQListener<MessageExt> {
             seckillActivityDao.revertStock(order.getSeckillActivityId());
             //revert the stock in redis
             redisService.revertStock("stock:" + order.getSeckillActivityId());
+            //remove timeout user from limit member list
+            redisService.removeLimitMember(order.getSeckillActivityId(), order.getUserId());
+
         }
 
     }
