@@ -35,15 +35,28 @@ public class SeckillActivityService {
     }
 
     public Order createOrder(long seckillActivityId, long userId) throws Exception {
+        /*
+         * 1. Create Order
+         */
         SeckillActivity activity = seckillActivityDao.querySeckillActivityById(seckillActivityId);
         Order order = new Order();
-        // 使用雪花算法生成订单ID
+        //Generate Order ID using Snowflake Algorithm
         order.setOrderNo(String.valueOf(snowFlake.nextId()));
         order.setSeckillActivityId(activity.getId());
         order.setUserId(userId);
         order.setOrderAmount(activity.getSeckillPrice().longValue());
-        // 发送创建订单消息
+
+        /*
+         *2.Send message of newly created order
+         */
         rocketMQService.sendMessage("seckill_order", JSON.toJSONString(order));
+
+        /*
+         * 3.Send order payment status check message
+         * 开源RocketMQ支持延迟消息，但是不支持秒级精度。默认支持18个level的延迟消息，这是通过broker端的messageDelayLevel配置项确定的，如下：
+         * messageDelayLevel=1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h
+         */
+        rocketMQService.sendDelayMessage("pay_check", JSON.toJSONString(order), 3);
 
         return order;
     }

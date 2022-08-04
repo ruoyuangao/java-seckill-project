@@ -53,6 +53,16 @@ public class RedisService {
             return false;
         }
     }
+
+    /**
+     * timeout order roll back
+     * @param key
+     */
+    public void revertStock(String key) {
+        Jedis jedisClient = jedisPool.getResource();
+        jedisClient.incr(key);
+        jedisClient.close();
+    }
 }
 
 
