@@ -23,6 +23,19 @@ public class RedisService {
         //链式调用
     }
 
+    /**
+     * 设置值
+     *
+     * @param key
+     * @param value
+     */
+    public void setValue(String key, String value) {
+        Jedis jedisClient = jedisPool.getResource();
+        jedisClient.set(key, value);
+        jedisClient.close();
+    }
+
+
     public String getValue(String key) {
         Jedis client = jedisPool.getResource();
         String value = client.get(key);

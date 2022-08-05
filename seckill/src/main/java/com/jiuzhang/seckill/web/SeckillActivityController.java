@@ -189,6 +189,4 @@ public class SeckillActivityController {
         seckillActivityService.payOrderProcess(orderNo);
         return "redirect:/seckill/orderQuery/" + orderNo;
     }
-
-
 }

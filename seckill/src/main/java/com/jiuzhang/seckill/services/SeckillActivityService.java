@@ -3,8 +3,10 @@ package com.jiuzhang.seckill.services;
 import com.alibaba.fastjson.JSON;
 import com.jiuzhang.seckill.db.dao.OrderDao;
 import com.jiuzhang.seckill.db.dao.SeckillActivityDao;
+import com.jiuzhang.seckill.db.dao.SeckillCommodityDao;
 import com.jiuzhang.seckill.db.po.Order;
 import com.jiuzhang.seckill.db.po.SeckillActivity;
+import com.jiuzhang.seckill.db.po.SeckillCommodity;
 import com.jiuzhang.seckill.mq.RocketMQService;
 import com.jiuzhang.seckill.util.SnowFlake;
 import lombok.extern.slf4j.Slf4j;
@@ -18,10 +20,13 @@ import java.util.Date;
 public class SeckillActivityService {
 
     @Resource
-    private RedisService service;
+    private RedisService redisService;
 
     @Resource
     private OrderDao orderDao;
+
+    @Resource
+    private SeckillCommodityDao seckillCommodityDao;
 
     @Resource
     private SeckillActivityDao seckillActivityDao;
@@ -33,7 +38,7 @@ public class SeckillActivityService {
 
     public boolean seckillStockValidator(long activityId) {
         String key = "stock:" + activityId;
-        return service.stockDeductValidation(key);
+        return redisService.stockDeductValidation(key);
     }
 
     public Order createOrder(long seckillActivityId, long userId) throws Exception {
@@ -61,6 +66,18 @@ public class SeckillActivityService {
         rocketMQService.sendDelayMessage("pay_check", JSON.toJSONString(order), 3);
 
         return order;
+    }
+
+    /**
+     * Push related info to redis
+     * @param seckillActivityId
+     */
+    public void pushSeckillInfoToRedis(long seckillActivityId) {
+        SeckillActivity seckillActivity = seckillActivityDao.querySeckillActivityById(seckillActivityId);
+        redisService.setValue("seckillActivity:" + seckillActivityId, JSON.toJSONString(seckillActivity));
+
+        SeckillCommodity seckillCommodity = seckillCommodityDao.querySeckillCommodityById(seckillActivity.getCommodityId());
+        redisService.setValue("seckillCommodity:" + seckillActivity.getCommodityId(), JSON.toJSONString(seckillCommodity));
     }
 
     /**
