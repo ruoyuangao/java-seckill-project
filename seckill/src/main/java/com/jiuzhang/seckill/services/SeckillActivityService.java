@@ -7,11 +7,13 @@ import com.jiuzhang.seckill.db.po.Order;
 import com.jiuzhang.seckill.db.po.SeckillActivity;
 import com.jiuzhang.seckill.mq.RocketMQService;
 import com.jiuzhang.seckill.util.SnowFlake;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Date;
 
+@Slf4j
 @Service
 public class SeckillActivityService {
 
@@ -61,17 +63,34 @@ public class SeckillActivityService {
         return order;
     }
 
-    public void payOrderProcess(String orderNo) {
+    /**
+     * The process after consumer successfully paid the order
+     *
+     * @param orderNo
+     */
+    public void payOrderProcess(String orderNo) throws Exception {
+        log.info("The order has been paid, order Id: " + orderNo);
         Order order = orderDao.queryOrder(orderNo);
-        boolean deductStockResult = seckillActivityDao.deductStock(order.getSeckillActivityId());
-
-        if (deductStockResult) {
-            order.setPayTime(new Date());
-            // 0. 没有库存，无效订单
-            // 1. 已创建并等待支付
-            // 2. 完成支付
-            order.setOrderStatus(2);
-            orderDao.updateOrder(order);
+        /*
+        1. Check whether the order is created
+        2. Check the payment status
+         */
+        if (order == null) {
+            log.error("The order Id does not exist:" + orderNo);
+            return;
+        } else if (order.getOrderStatus() != 1) {
+            log.error("The order is invalid: " + orderNo);
+            return;
         }
+        /*
+        3. The order is valid
+         */
+        order.setPayTime(new Date());
+        order.setOrderStatus(2);
+        orderDao.updateOrder(order);
+        /*
+        4. Send order successfully paid message
+         */
+        rocketMQService.sendMessage("pay_done", JSON.toJSONString(order));
     }
 }
