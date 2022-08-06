@@ -3,8 +3,6 @@ package com.jiuzhang.seckill.web;
 import com.alibaba.csp.sentinel.Entry;
 import com.alibaba.csp.sentinel.SphU;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
-import com.alibaba.csp.sentinel.slots.block.RuleConstant;
-import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
 import com.alibaba.fastjson.JSON;
 import com.jiuzhang.seckill.db.dao.OrderDao;
 import com.jiuzhang.seckill.db.dao.SeckillActivityDao;
@@ -23,12 +21,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -90,15 +86,13 @@ public class SeckillActivityController {
 
     // show all the Seckill activities
     @RequestMapping("/seckills")
-    public String activityList(
-            Map<String, Object> resultMap
-    ) {
-        try(Entry entry = SphU.entry("seckills")) {
+    public String activityList(Map<String, Object> resultMap) {
+        try (Entry entry = SphU.entry("seckills")) {
             List<SeckillActivity> seckillActivities = seckillActivityDao.querySeckillActivitysByStatus(1);
             resultMap.put("seckillActivities", seckillActivities);
             return "seckill_activity";
         } catch (BlockException ex) {
-            log.error("The query for seckill activity list has been limited" + ex.toString());
+            log.error("The Seckill activity list has been limited "+ex.toString());
             return "wait";
         }
     }
@@ -216,6 +210,4 @@ public class SeckillActivityController {
         String date = df.format(new Date());
         return date;
     }
-
-
 }
